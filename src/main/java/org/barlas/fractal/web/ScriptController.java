@@ -8,10 +8,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 
 @Controller
@@ -22,9 +24,9 @@ public class ScriptController {
     @Autowired
     private ScriptService scriptService;
 
-    @RequestMapping(value = "/scripts")
-    @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
+    @RequestMapping(value = "/scripts", method = RequestMethod.POST)
+    @ResponseStatus(HttpStatus.CREATED)
     public String createScript(@Valid @RequestBody CreateScriptRequest request) {
         Script script = new Script();
         script.setId(UUID.randomUUID().toString());
@@ -35,6 +37,12 @@ public class ScriptController {
 
         scriptService.createScript(script);
         return script.getId();
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/scripts", method = RequestMethod.GET)
+    public List<Script> getScripts() {
+        return scriptService.getScripts(userHolder.get().getId());
     }
 
 }
