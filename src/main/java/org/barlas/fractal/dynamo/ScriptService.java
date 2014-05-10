@@ -53,7 +53,6 @@ public class ScriptService {
                 .withTableName(SCRIPTS)
                 .withIndexName(USER_ID + INDEX_SUFFIX)
                 .withKeyConditions(keyConditions)
-                .withSelect()
                 .withAttributesToGet(Arrays.asList(SCRIPT_ID, SCRIPT, NAME, DESCRIPTION));
 
         QueryResult result = dynamo.query(queryRequest);
