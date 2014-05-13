@@ -3,7 +3,8 @@ package org.barlas.fractal.domain;
 public class User {
 
     private String id;
-    private String displayName;
+    private String name;
+    private String email;
 
     public String getId() {
         return id;
@@ -13,11 +14,20 @@ public class User {
         this.id = id;
     }
 
-    public String getDisplayName() {
-        return displayName;
+    public String getEmail() {
+        return email;
     }
 
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
+    public void setEmail(String email) {
+        this.email = email;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
 }

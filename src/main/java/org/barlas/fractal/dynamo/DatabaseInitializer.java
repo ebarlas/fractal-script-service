@@ -25,9 +25,7 @@ public class DatabaseInitializer {
 
     private static final String usersTable = "users";
     private static final String userId = "userId";
-    
-    private static final String socialNetworksTable = "socialNetworks";
-    private static final String socialId = "socialId";
+    private static final String email = "email";
     
     private static final String tagsTable = "tags";
     private static final String tagName = "tagName";
@@ -41,50 +39,8 @@ public class DatabaseInitializer {
     @PostConstruct
     public void init() {
         createUsersTable();
-        createSocialNetworksTable();
         createTagsTable();
         createScriptsTable();
-    }
-
-    private void createSocialNetworksTable() {
-        if (Tables.doesTableExist(dynamo, socialNetworksTable)) {
-            logger.info("table " + socialNetworksTable + " is already active");
-            return;
-        }
-
-        CreateTableRequest createTableRequest = new CreateTableRequest()
-                .withTableName(socialNetworksTable)
-                .withKeySchema(
-                        new KeySchemaElement()
-                                .withAttributeName(socialId)
-                                .withKeyType(KeyType.HASH))
-                .withGlobalSecondaryIndexes(
-                        new GlobalSecondaryIndex()
-                                .withIndexName(userId + indexSuffix)
-                                .withKeySchema(new KeySchemaElement().withKeyType(KeyType.HASH).withAttributeName(userId))
-                                .withProjection(new Projection().withProjectionType(ProjectionType.ALL))
-                                .withProvisionedThroughput(new ProvisionedThroughput().withReadCapacityUnits(1L).withWriteCapacityUnits(1L))
-                )
-                .withAttributeDefinitions(
-                        new AttributeDefinition()
-                                .withAttributeName(socialId)
-                                .withAttributeType(ScalarAttributeType.S),
-                        new AttributeDefinition()
-                                .withAttributeName(userId)
-                                .withAttributeType(ScalarAttributeType.S)
-                )
-                .withProvisionedThroughput(
-                        new ProvisionedThroughput()
-                                .withReadCapacityUnits(1L)
-                                .withWriteCapacityUnits(1L)
-                );
-
-        TableDescription createdTableDescription = dynamo.createTable(createTableRequest).getTableDescription();
-        logger.info("Created Table: " + createdTableDescription);
-
-        // Wait for it to become active
-        logger.info("Waiting for " + socialNetworksTable + " to become ACTIVE...");
-        Tables.waitForTableToBecomeActive(dynamo, socialNetworksTable);
     }
 
     private void createTagsTable() {
@@ -141,9 +97,19 @@ public class DatabaseInitializer {
                         new KeySchemaElement()
                                 .withAttributeName(userId)
                                 .withKeyType(KeyType.HASH))
+                .withGlobalSecondaryIndexes(
+                        new GlobalSecondaryIndex()
+                                .withIndexName(email + indexSuffix)
+                                .withKeySchema(new KeySchemaElement().withKeyType(KeyType.HASH).withAttributeName(email))
+                                .withProjection(new Projection().withProjectionType(ProjectionType.ALL))
+                                .withProvisionedThroughput(new ProvisionedThroughput().withReadCapacityUnits(1L).withWriteCapacityUnits(1L))
+                )
                 .withAttributeDefinitions(
                         new AttributeDefinition()
                                 .withAttributeName(userId)
+                                .withAttributeType(ScalarAttributeType.S),
+                        new AttributeDefinition()
+                                .withAttributeName(email)
                                 .withAttributeType(ScalarAttributeType.S)
                 )
                 .withProvisionedThroughput(

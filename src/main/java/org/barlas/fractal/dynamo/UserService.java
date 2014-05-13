@@ -2,25 +2,26 @@ package org.barlas.fractal.dynamo;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
-import com.amazonaws.services.dynamodbv2.model.GetItemRequest;
-import com.amazonaws.services.dynamodbv2.model.GetItemResult;
+import com.amazonaws.services.dynamodbv2.model.ComparisonOperator;
+import com.amazonaws.services.dynamodbv2.model.Condition;
 import com.amazonaws.services.dynamodbv2.model.PutItemRequest;
-import org.barlas.fractal.domain.SocialNetwork;
+import com.amazonaws.services.dynamodbv2.model.QueryRequest;
+import com.amazonaws.services.dynamodbv2.model.QueryResult;
 import org.barlas.fractal.domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class UserService {
 
     private static final String USERS = "users";
     private static final String USER_ID = "userId";
-    private static final String DISPLAY_NAME = "displayName";
-
-    private static final String SOCIAL_NETWORKS = "socialNetworks";
-    private static final String SOCIAL_ID = "socialId";
-    private static final String NETWORK = "network";
+    private static final String NAME = "name";
+    private static final String EMAIL = "email";
+    private static final String INDEX_SUFFIX = "-index";
 
     @Autowired
     private AmazonDynamoDBClient dynamo;
@@ -28,62 +29,45 @@ public class UserService {
     public void createUser(User user) {
         Map<String, AttributeValue> item = new HashMap<String, AttributeValue>();
         item.put(USER_ID, new AttributeValue(user.getId()));
-        item.put(DISPLAY_NAME, new AttributeValue(user.getDisplayName()));
+        item.put(NAME, new AttributeValue(user.getName()));
+        item.put(EMAIL, new AttributeValue(user.getEmail()));
 
         PutItemRequest putItemRequest = new PutItemRequest(USERS, item);
         dynamo.putItem(putItemRequest);
     }
 
-    public User getUser(String userId) {
-        Map<String, AttributeValue> key = new HashMap<String, AttributeValue>();
-        key.put(USER_ID, new AttributeValue().withS(userId));
+    public User getUserByEmail(String email) {
+        Condition condition = new Condition()
+                .withComparisonOperator(ComparisonOperator.EQ)
+                .withAttributeValueList(new AttributeValue().withS(email));
 
-        GetItemRequest getItemRequest = new GetItemRequest()
-                .withTableName("users")
-                .withKey(key)
-                .withAttributesToGet(DISPLAY_NAME);
+        Map<String, Condition> keyConditions = new HashMap<String, Condition>();
+        keyConditions.put(EMAIL, condition);
 
-        GetItemResult result = dynamo.getItem(getItemRequest);
-        Map<String, AttributeValue> item = result.getItem();
-        if(item == null || item.isEmpty()) {
+        QueryRequest queryRequest = new QueryRequest()
+                .withTableName(USERS)
+                .withIndexName(EMAIL + INDEX_SUFFIX)
+                .withKeyConditions(keyConditions)
+                .withLimit(1)
+                .withAttributesToGet(Arrays.asList(NAME, USER_ID));
+
+        QueryResult result = dynamo.query(queryRequest);
+
+        List<Map<String, AttributeValue>> items = result.getItems();
+        if(items == null || items.isEmpty()) {
             return null;
         }
 
-        AttributeValue value = item.get(DISPLAY_NAME);
+        Map<String, AttributeValue> item = items.get(0);
+
+        AttributeValue nameValue = item.get(NAME);
+        AttributeValue userIdValue = item.get(USER_ID);
 
         User user = new User();
-        user.setId(userId);
-        user.setDisplayName(value.getS());
+        user.setId(userIdValue.getS());
+        user.setName(nameValue.getS());
+        user.setEmail(email);
         return user;
-    }
-
-    public String getUserId(String socialId) {
-        Map<String, AttributeValue> key = new HashMap<String, AttributeValue>();
-        key.put(SOCIAL_ID, new AttributeValue().withS(socialId));
-
-        GetItemRequest getItemRequest = new GetItemRequest()
-                .withTableName(SOCIAL_NETWORKS)
-                .withKey(key)
-                .withAttributesToGet(USER_ID);
-
-        GetItemResult result = dynamo.getItem(getItemRequest);
-        Map<String, AttributeValue> item = result.getItem();
-        if(item == null || item.isEmpty()) {
-            return null;
-        }
-
-        AttributeValue value = item.get(USER_ID);
-        return value.getS();
-    }
-
-    public void createSocialNetwork(SocialNetwork network) {
-        Map<String, AttributeValue> item = new HashMap<String, AttributeValue>();
-        item.put(SOCIAL_ID, new AttributeValue(network.getId()));
-        item.put(USER_ID, new AttributeValue(network.getUserId()));
-        item.put(NETWORK, new AttributeValue(network.getNetwork()));
-
-        PutItemRequest putItemRequest = new PutItemRequest(SOCIAL_NETWORKS, item);
-        dynamo.putItem(putItemRequest);
     }
 
 }

@@ -1,18 +1,22 @@
 package org.barlas.fractal.identity;
 
 import org.apache.log4j.Logger;
-import org.barlas.fractal.domain.SocialNetwork;
 import org.barlas.fractal.domain.User;
 import org.barlas.fractal.dynamo.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.filter.GenericFilterBean;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,60 +25,72 @@ public class IdentityFilter extends GenericFilterBean {
 
     private final Logger logger = Logger.getLogger(getClass());
 
-    private static final String GOOGLE_NETWORK = "google";
     private static final String AUTHORIZATION_HEADER = "Authorization";
+    private static final String OAUTH_PROVIDER = "OAuth-Provider";
     private static final Pattern TOKEN_PATTERN = Pattern.compile("\\s*Bearer\\s*(.*)", Pattern.CASE_INSENSITIVE);
 
-    @Autowired
-    private GoogleService googleService;
+    @Resource(name = "idps")
+    private List<? extends IdentityProvider> idps;
     @Autowired
     private UserService userService;
     @Autowired
     private ThreadLocal<User> userHolder;
 
+    private Map<String, IdentityProvider> idpTable = new HashMap<String, IdentityProvider>();
+
+    @PostConstruct
+    public void init() {
+        for(IdentityProvider idp : idps) {
+            idpTable.put(idp.getName().toLowerCase(), idp);
+        }
+    }
+
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest)req;
 
-        // get auth header
-        String header = request.getHeader(AUTHORIZATION_HEADER);
-        if(header == null) {
+        // get authorization header
+        String authorizationHeader = request.getHeader(AUTHORIZATION_HEADER);
+        if(authorizationHeader == null) {
             throw new UnauthenticatedException();
         }
 
         // parse bearer token
-        Matcher matcher = TOKEN_PATTERN.matcher(header);
+        Matcher matcher = TOKEN_PATTERN.matcher(authorizationHeader);
         if(!matcher.matches()) {
             throw new UnauthenticatedException();
         }
 
-        // query google plus identity
+        // extract access token from authorization header
         String accessToken = matcher.group(1);
-        GoogleUser googleUser = googleService.getIdentity(accessToken);
 
-        // query user by social id
-        String userId = userService.getUserId(googleUser.getId());
-
-        // query complete user, if possible
-        User user = null;
-        if(userId != null) {
-            user = userService.getUser(userId);
+        // examine provider header
+        IdentityProvider idp = null;
+        String providerHeader = request.getHeader(OAUTH_PROVIDER);
+        if(providerHeader != null) {
+            idp = idpTable.get(providerHeader);
         }
+
+        // fallback to idp[0]
+        if(idp == null) {
+            idp = idps.get(0);
+        }
+
+        // get identity
+        Identity identity = idp.getIdentity(accessToken);
+
+        // query user by email
+        User user = userService.getUserByEmail(identity.getEmail());
 
         // create new user, if needed
         if(user == null) {
             user = new User();
             user.setId(UUID.randomUUID().toString());
-            user.setDisplayName(googleUser.getDisplayName());
+            user.setName(identity.getName());
+            user.setEmail(identity.getEmail());
             userService.createUser(user);
 
-            SocialNetwork socialNetwork = new SocialNetwork();
-            socialNetwork.setId(googleUser.getId());
-            socialNetwork.setNetwork(GOOGLE_NETWORK);
-            socialNetwork.setUserId(user.getId());
-            userService.createSocialNetwork(socialNetwork);
-
-            logger.info("created user with social network, userId=" + user.getId() + ", socialId=" + socialNetwork.getId());
+            logger.info("created user with social network, userId=" + user.getId());
         }
 
         // set user context
