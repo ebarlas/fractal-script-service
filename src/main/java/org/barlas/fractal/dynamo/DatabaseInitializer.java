@@ -53,7 +53,7 @@ public class DatabaseInitializer {
                 .withTableName(tagsTable)
                 .withKeySchema(
                         new KeySchemaElement()
-                                .withAttributeName(userId)
+                                .withAttributeName(scriptId)
                                 .withKeyType(KeyType.HASH),
                         new KeySchemaElement()
                                 .withAttributeName(tagName)
@@ -65,12 +65,22 @@ public class DatabaseInitializer {
                                 .withProjection(new Projection().withProjectionType(ProjectionType.ALL))
                                 .withProvisionedThroughput(new ProvisionedThroughput().withReadCapacityUnits(1L).withWriteCapacityUnits(1L))
                 )
+                .withGlobalSecondaryIndexes(
+                        new GlobalSecondaryIndex()
+                                .withIndexName(userId + indexSuffix)
+                                .withKeySchema(new KeySchemaElement().withKeyType(KeyType.HASH).withAttributeName(userId))
+                                .withProjection(new Projection().withProjectionType(ProjectionType.ALL))
+                                .withProvisionedThroughput(new ProvisionedThroughput().withReadCapacityUnits(1L).withWriteCapacityUnits(1L))
+                )
                 .withAttributeDefinitions(
                         new AttributeDefinition()
-                                .withAttributeName(userId)
+                                .withAttributeName(scriptId)
                                 .withAttributeType(ScalarAttributeType.S),
                         new AttributeDefinition()
                                 .withAttributeName(tagName)
+                                .withAttributeType(ScalarAttributeType.S),
+                        new AttributeDefinition()
+                                .withAttributeName(userId)
                                 .withAttributeType(ScalarAttributeType.S))
                 .withProvisionedThroughput(
                         new ProvisionedThroughput()

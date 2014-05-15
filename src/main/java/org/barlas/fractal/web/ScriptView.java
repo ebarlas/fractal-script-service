@@ -1,16 +1,22 @@
 package org.barlas.fractal.web;
 
-import javax.validation.constraints.NotNull;
 import java.util.Set;
 
-public class CreateScriptRequest {
+public class ScriptView {
 
-    @NotNull
+    private String id;
     private String script;
-    @NotNull
     private String name;
     private String description;
     private Set<String> tags;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getScript() {
         return script;

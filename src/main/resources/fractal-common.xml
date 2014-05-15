@@ -30,4 +30,6 @@
 
     <bean id="scriptService" class="org.barlas.fractal.dynamo.ScriptService"/>
 
+    <bean id="tagService" class="org.barlas.fractal.dynamo.TagService"/>
+
 </beans>
