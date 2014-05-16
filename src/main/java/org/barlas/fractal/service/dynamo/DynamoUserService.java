@@ -1,4 +1,4 @@
-package org.barlas.fractal.dynamo;
+package org.barlas.fractal.service.dynamo;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
@@ -8,6 +8,7 @@ import com.amazonaws.services.dynamodbv2.model.PutItemRequest;
 import com.amazonaws.services.dynamodbv2.model.QueryRequest;
 import com.amazonaws.services.dynamodbv2.model.QueryResult;
 import org.barlas.fractal.domain.User;
+import org.barlas.fractal.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
@@ -15,7 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class UserService {
+public class DynamoUserService implements UserService {
 
     private static final String USERS = "users";
     private static final String USER_ID = "userId";

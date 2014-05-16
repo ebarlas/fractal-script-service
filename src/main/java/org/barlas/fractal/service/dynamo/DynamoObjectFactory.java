@@ -1,4 +1,4 @@
-package org.barlas.fractal.dynamo;
+package org.barlas.fractal.service.dynamo;
 
 import com.amazonaws.auth.ClasspathPropertiesFileCredentialsProvider;
 import com.amazonaws.regions.Region;

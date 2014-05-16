@@ -2,8 +2,8 @@ package org.barlas.fractal.web;
 
 import org.barlas.fractal.domain.Script;
 import org.barlas.fractal.domain.User;
-import org.barlas.fractal.dynamo.ScriptService;
-import org.barlas.fractal.dynamo.TagService;
+import org.barlas.fractal.service.ScriptService;
+import org.barlas.fractal.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -46,7 +46,7 @@ public class ScriptController {
         scriptService.createScript(script);
 
         if(request.getTags() != null && !request.getTags().isEmpty()) {
-            tagService.createTag(userId, script.getId(), request.getTags());
+            tagService.createTags(userId, script.getId(), request.getTags());
         }
 
         return script.getId();
@@ -57,7 +57,7 @@ public class ScriptController {
     public List<ScriptView> getScripts() {
         String userId = userHolder.get().getId();
         List<Script> scripts = scriptService.getScripts(userId);
-        Map<String, Set<String>> scriptTags = tagService.getTagNamesByScript(userId);
+        Map<String, Set<String>> scriptTags = tagService.getTagNames(userId);
 
         List<ScriptView> views = new ArrayList<ScriptView>();
         for(Script script : scripts) {

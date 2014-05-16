@@ -2,7 +2,7 @@ package org.barlas.fractal.identity;
 
 import org.apache.log4j.Logger;
 import org.barlas.fractal.domain.User;
-import org.barlas.fractal.dynamo.UserService;
+import org.barlas.fractal.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.filter.GenericFilterBean;
 

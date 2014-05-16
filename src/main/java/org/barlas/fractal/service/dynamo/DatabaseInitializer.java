@@ -1,4 +1,4 @@
-package org.barlas.fractal.dynamo;
+package org.barlas.fractal.service.dynamo;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.model.AttributeDefinition;

@@ -1,4 +1,4 @@
-package org.barlas.fractal.dynamo;
+package org.barlas.fractal.service.dynamo;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
@@ -11,6 +11,7 @@ import com.amazonaws.services.dynamodbv2.model.QueryRequest;
 import com.amazonaws.services.dynamodbv2.model.QueryResult;
 import com.amazonaws.services.dynamodbv2.model.ReturnConsumedCapacity;
 import com.amazonaws.services.dynamodbv2.model.WriteRequest;
+import org.barlas.fractal.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -21,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class TagService {
+public class DynamoTagService implements TagService {
 
     private static final String TAGS_TABLE = "tags";
     private static final String SCRIPT_ID = "scriptId";
@@ -32,7 +33,7 @@ public class TagService {
     @Autowired
     private AmazonDynamoDBClient dynamo;
 
-    public void createTag(String userId, String scriptId, Set<String> tagNames) {
+    public void createTags(String userId, String scriptId, Set<String> tagNames) {
         Map<String, List<WriteRequest>> requestItems = new HashMap<String, List<WriteRequest>>();
         List<WriteRequest> tagList = new ArrayList<WriteRequest>();
         requestItems.put(TAGS_TABLE, tagList);
@@ -55,7 +56,7 @@ public class TagService {
         } while (result.getUnprocessedItems().size() > 0);
     }
 
-    public Map<String, Set<String>> getTagNamesByScript(String userId) {
+    public Map<String, Set<String>> getTagNames(String userId) {
         Condition condition = new Condition()
                 .withComparisonOperator(ComparisonOperator.EQ)
                 .withAttributeValueList(new AttributeValue().withS(userId));

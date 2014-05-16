@@ -11,13 +11,17 @@
 
     <context:annotation-config />
 
+    <bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean"/>
+
+    <bean id="methodValidationPostProcessor" class="org.springframework.validation.beanvalidation.MethodValidationPostProcessor"/>
+
     <bean id="restOperations" class="org.springframework.web.client.RestTemplate"/>
 
     <bean id="identityFilter" class="org.barlas.fractal.identity.IdentityFilter"/>
 
-    <bean id="dynamo" class="org.barlas.fractal.dynamo.DynamoObjectFactory"/>
+    <bean id="dynamo" class="org.barlas.fractal.service.dynamo.DynamoObjectFactory"/>
 
-    <bean id="databaseInitializer" class="org.barlas.fractal.dynamo.DatabaseInitializer"/>
+    <bean id="databaseInitializer" class="org.barlas.fractal.service.dynamo.DatabaseInitializer"/>
 
     <util:list id="idps">
         <bean id="googleProvider" class="org.barlas.fractal.identity.google.GoogleIdentityProvider"/>
@@ -26,10 +30,10 @@
 
     <bean id="userHolder" class="java.lang.ThreadLocal"/>
 
-    <bean id="userService" class="org.barlas.fractal.dynamo.UserService"/>
+    <bean id="userService" class="org.barlas.fractal.service.dynamo.DynamoUserService"/>
 
-    <bean id="scriptService" class="org.barlas.fractal.dynamo.ScriptService"/>
+    <bean id="scriptService" class="org.barlas.fractal.service.dynamo.DynamoScriptService"/>
 
-    <bean id="tagService" class="org.barlas.fractal.dynamo.TagService"/>
+    <bean id="tagService" class="org.barlas.fractal.service.dynamo.DynamoTagService"/>
 
 </beans>

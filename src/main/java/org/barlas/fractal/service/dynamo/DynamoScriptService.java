@@ -1,4 +1,4 @@
-package org.barlas.fractal.dynamo;
+package org.barlas.fractal.service.dynamo;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
@@ -8,6 +8,7 @@ import com.amazonaws.services.dynamodbv2.model.PutItemRequest;
 import com.amazonaws.services.dynamodbv2.model.QueryRequest;
 import com.amazonaws.services.dynamodbv2.model.QueryResult;
 import org.barlas.fractal.domain.Script;
+import org.barlas.fractal.service.ScriptService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ScriptService {
+public class DynamoScriptService implements ScriptService {
 
     private static final String SCRIPTS = "scripts";
     private static final String SCRIPT_ID = "scriptId";
