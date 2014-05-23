@@ -12,7 +12,12 @@
        http://www.springframework.org/schema/context/spring-context.xsd">
 
     <context:annotation-config />
-    <context:component-scan base-package="org.barlas.fractal.web" />
-    <mvc:annotation-driven/>
+    <context:component-scan base-package="org.barlas.fractal" />
+
+    <mvc:annotation-driven>
+        <mvc:message-converters>
+            <ref bean="jsonConverter"/>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
 
 </beans>

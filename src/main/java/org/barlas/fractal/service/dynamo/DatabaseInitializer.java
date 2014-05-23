@@ -14,6 +14,7 @@ import com.amazonaws.services.dynamodbv2.model.TableDescription;
 import com.amazonaws.services.dynamodbv2.util.Tables;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import javax.annotation.PostConstruct;
 
@@ -22,17 +23,17 @@ public class DatabaseInitializer {
     private static final Logger logger = Logger.getLogger(DatabaseInitializer.class);
 
     private static final String indexSuffix = "-index";
-
-    private static final String usersTable = "users";
     private static final String userId = "userId";
     private static final String email = "email";
-    
-    private static final String tagsTable = "tags";
     private static final String tagName = "tagName";
-    
-    private static final String scriptsTable = "scripts";
     private static final String scriptId = "scriptId";
 
+    @Value("${scriptsTableName}")
+    private String scriptsTableName;
+    @Value("${tagsTableName}")
+    private String tagsTableName;
+    @Value("${usersTableName}")
+    private String usersTableName;
     @Autowired
     private AmazonDynamoDBClient dynamo;
 
@@ -44,13 +45,13 @@ public class DatabaseInitializer {
     }
 
     private void createTagsTable() {
-        if (Tables.doesTableExist(dynamo, tagsTable)) {
-            logger.info("Table " + tagsTable + " is already ACTIVE");
+        if (Tables.doesTableExist(dynamo, tagsTableName)) {
+            logger.info("Table " + tagsTableName + " is already ACTIVE");
             return;
         }
 
         CreateTableRequest createTableRequest = new CreateTableRequest()
-                .withTableName(tagsTable)
+                .withTableName(tagsTableName)
                 .withKeySchema(
                         new KeySchemaElement()
                                 .withAttributeName(scriptId)
@@ -91,18 +92,18 @@ public class DatabaseInitializer {
         logger.info("Created Table: " + createdTableDescription);
 
         // Wait for it to become active
-        logger.info("Waiting for " + tagsTable + " to become ACTIVE...");
-        Tables.waitForTableToBecomeActive(dynamo, tagsTable);
+        logger.info("Waiting for " + tagsTableName + " to become ACTIVE...");
+        Tables.waitForTableToBecomeActive(dynamo, tagsTableName);
     }
 
     private void createUsersTable() {
-        if (Tables.doesTableExist(dynamo, usersTable)) {
-            logger.info("Table " + usersTable + " is already ACTIVE");
+        if (Tables.doesTableExist(dynamo, usersTableName)) {
+            logger.info("Table " + usersTableName + " is already ACTIVE");
             return;
         }
 
         CreateTableRequest createTableRequest = new CreateTableRequest()
-                .withTableName(usersTable)
+                .withTableName(usersTableName)
                 .withKeySchema(
                         new KeySchemaElement()
                                 .withAttributeName(userId)
@@ -132,18 +133,18 @@ public class DatabaseInitializer {
         logger.info("Created Table: " + createdTableDescription);
 
         // Wait for it to become active
-        logger.info("Waiting for " + usersTable + " to become ACTIVE...");
-        Tables.waitForTableToBecomeActive(dynamo, usersTable);
+        logger.info("Waiting for " + usersTableName + " to become ACTIVE...");
+        Tables.waitForTableToBecomeActive(dynamo, usersTableName);
     }
 
     private void createScriptsTable() {
-        if (Tables.doesTableExist(dynamo, scriptsTable)) {
-            logger.info("Table " + scriptsTable + " is already ACTIVE");
+        if (Tables.doesTableExist(dynamo, scriptsTableName)) {
+            logger.info("Table " + scriptsTableName + " is already ACTIVE");
             return;
         }
 
         CreateTableRequest createTableRequest = new CreateTableRequest()
-                .withTableName(scriptsTable)
+                .withTableName(scriptsTableName)
                 .withKeySchema(
                         new KeySchemaElement()
                                 .withAttributeName(scriptId)
@@ -173,8 +174,8 @@ public class DatabaseInitializer {
         logger.info("Created Table: " + createdTableDescription);
 
         // Wait for it to become active
-        logger.info("Waiting for " + scriptsTable + " to become ACTIVE...");
-        Tables.waitForTableToBecomeActive(dynamo, scriptsTable);
+        logger.info("Waiting for " + scriptsTableName + " to become ACTIVE...");
+        Tables.waitForTableToBecomeActive(dynamo, scriptsTableName);
     }
 
 }

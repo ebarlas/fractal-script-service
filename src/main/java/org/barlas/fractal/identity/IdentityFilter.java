@@ -48,7 +48,14 @@ public class IdentityFilter extends GenericFilterBean {
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest)req;
+        if(!request.getRequestURI().startsWith("/test")) {
+            setIdentity(request);
+        }
 
+        filterChain.doFilter(req, res);
+    }
+
+    private void setIdentity(HttpServletRequest request) {
         // get authorization header
         String authorizationHeader = request.getHeader(AUTHORIZATION_HEADER);
         if(authorizationHeader == null) {
@@ -95,8 +102,6 @@ public class IdentityFilter extends GenericFilterBean {
 
         // set user context
         userHolder.set(user);
-
-        filterChain.doFilter(req, res);
     }
 
 }

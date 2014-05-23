@@ -13,6 +13,7 @@ import com.amazonaws.services.dynamodbv2.model.ReturnConsumedCapacity;
 import com.amazonaws.services.dynamodbv2.model.WriteRequest;
 import org.barlas.fractal.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,19 +25,20 @@ import java.util.Set;
 
 public class DynamoTagService implements TagService {
 
-    private static final String TAGS_TABLE = "tags";
     private static final String SCRIPT_ID = "scriptId";
     private static final String USER_ID = "userId";
     private static final String TAG_NAME = "tagName";
     private static final String INDEX_SUFFIX = "-index";
 
+    @Value("${tagsTableName}")
+    private String tagsTableName;
     @Autowired
     private AmazonDynamoDBClient dynamo;
 
     public void createTags(String userId, String scriptId, Set<String> tagNames) {
         Map<String, List<WriteRequest>> requestItems = new HashMap<String, List<WriteRequest>>();
         List<WriteRequest> tagList = new ArrayList<WriteRequest>();
-        requestItems.put(TAGS_TABLE, tagList);
+        requestItems.put(tagsTableName, tagList);
 
         for(String tagName : tagNames) {
             Map<String, AttributeValue> item = new HashMap<String, AttributeValue>();
@@ -65,7 +67,7 @@ public class DynamoTagService implements TagService {
         keyConditions.put(USER_ID, condition);
 
         QueryRequest queryRequest = new QueryRequest()
-                .withTableName(TAGS_TABLE)
+                .withTableName(tagsTableName)
                 .withIndexName(USER_ID + INDEX_SUFFIX)
                 .withKeyConditions(keyConditions)
                 .withAttributesToGet(SCRIPT_ID, TAG_NAME);
@@ -102,7 +104,7 @@ public class DynamoTagService implements TagService {
         keyConditions.put(SCRIPT_ID, condition);
 
         QueryRequest queryRequest = new QueryRequest()
-                .withTableName(TAGS_TABLE)
+                .withTableName(tagsTableName)
                 .withKeyConditions(keyConditions)
                 .withAttributesToGet(TAG_NAME);
 

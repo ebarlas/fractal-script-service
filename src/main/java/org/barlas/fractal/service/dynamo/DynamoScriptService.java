@@ -10,6 +10,7 @@ import com.amazonaws.services.dynamodbv2.model.QueryResult;
 import org.barlas.fractal.domain.Script;
 import org.barlas.fractal.service.ScriptService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,7 +20,6 @@ import java.util.Map;
 
 public class DynamoScriptService implements ScriptService {
 
-    private static final String SCRIPTS = "scripts";
     private static final String SCRIPT_ID = "scriptId";
     private static final String USER_ID = "userId";
     private static final String SCRIPT = "script";
@@ -27,6 +27,8 @@ public class DynamoScriptService implements ScriptService {
     private static final String DESCRIPTION = "description";
     private static final String INDEX_SUFFIX = "-index";
 
+    @Value("${scriptsTableName}")
+    private String scriptsTableName;
     @Autowired
     private AmazonDynamoDBClient dynamo;
 
@@ -38,7 +40,7 @@ public class DynamoScriptService implements ScriptService {
         item.put(NAME, new AttributeValue(script.getName()));
         item.put(DESCRIPTION, new AttributeValue(script.getDescription()));
 
-        PutItemRequest putItemRequest = new PutItemRequest(SCRIPTS, item);
+        PutItemRequest putItemRequest = new PutItemRequest(scriptsTableName, item);
         dynamo.putItem(putItemRequest);
     }
 
@@ -51,7 +53,7 @@ public class DynamoScriptService implements ScriptService {
         keyConditions.put(USER_ID, condition);
 
         QueryRequest queryRequest = new QueryRequest()
-                .withTableName(SCRIPTS)
+                .withTableName(scriptsTableName)
                 .withIndexName(USER_ID + INDEX_SUFFIX)
                 .withKeyConditions(keyConditions)
                 .withAttributesToGet(Arrays.asList(SCRIPT_ID, SCRIPT, NAME, DESCRIPTION));

@@ -2,9 +2,11 @@ package org.barlas.fractal.identity;
 
 public class Identity {
 
-    private final String id;
-    private final String name;
-    private final String email;
+    private String id;
+    private String name;
+    private String email;
+
+    public Identity() {}
 
     public Identity(String id, String name, String email) {
         this.id = id;
@@ -16,12 +18,24 @@ public class Identity {
         return id;
     }
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public String getName() {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getEmail() {
         return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
 }

@@ -10,6 +10,7 @@ import com.amazonaws.services.dynamodbv2.model.QueryResult;
 import org.barlas.fractal.domain.User;
 import org.barlas.fractal.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -18,12 +19,13 @@ import java.util.Map;
 
 public class DynamoUserService implements UserService {
 
-    private static final String USERS = "users";
     private static final String USER_ID = "userId";
     private static final String NAME = "name";
     private static final String EMAIL = "email";
     private static final String INDEX_SUFFIX = "-index";
 
+    @Value("${usersTableName}")
+    private String usersTableName;
     @Autowired
     private AmazonDynamoDBClient dynamo;
 
@@ -33,7 +35,7 @@ public class DynamoUserService implements UserService {
         item.put(NAME, new AttributeValue(user.getName()));
         item.put(EMAIL, new AttributeValue(user.getEmail()));
 
-        PutItemRequest putItemRequest = new PutItemRequest(USERS, item);
+        PutItemRequest putItemRequest = new PutItemRequest(usersTableName, item);
         dynamo.putItem(putItemRequest);
     }
 
@@ -46,7 +48,7 @@ public class DynamoUserService implements UserService {
         keyConditions.put(EMAIL, condition);
 
         QueryRequest queryRequest = new QueryRequest()
-                .withTableName(USERS)
+                .withTableName(usersTableName)
                 .withIndexName(EMAIL + INDEX_SUFFIX)
                 .withKeyConditions(keyConditions)
                 .withLimit(1)

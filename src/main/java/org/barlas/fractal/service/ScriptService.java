@@ -23,5 +23,4 @@ public interface ScriptService {
      */
     @NotNull List<Script> getScripts(@NotNull @NotEmpty String userId);
 
-
 }
